@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NoviStudyMaterialSpringbootApplication {
+public class BooksCrudDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NoviStudyMaterialSpringbootApplication.class, args);
+		SpringApplication.run(BooksCrudDemoApplication.class, args);
 	}
 
 }

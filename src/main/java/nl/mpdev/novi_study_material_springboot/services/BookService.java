@@ -1,6 +1,7 @@
 package nl.mpdev.novi_study_material_springboot.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import nl.mpdev.novi_study_material_springboot.exceptions.APIRequestException;
 import nl.mpdev.novi_study_material_springboot.models.Book;
 import nl.mpdev.novi_study_material_springboot.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,8 @@ public class BookService {
 
   public void deleteBook(long id) {
     if (!bookRepository.existsById(id)) {
-      throw new EntityNotFoundException("No book found");
+//      throw new EntityNotFoundException("No book found");
+      throw new APIRequestException("No book found");
     }
     bookRepository.deleteById(id);
   }
