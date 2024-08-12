@@ -30,8 +30,10 @@ public class BookService {
 
   public Book getBook(long id) {
     // Im using orElse fluent style that trows an exception
-    Book book = bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No book found"));
-    return book;
+//    Book book = bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No book found"));
+//    return book;
+
+      return bookRepository.findById(id).orElseThrow(() -> new APIRequestException("No Book found"));
   }
 
   public List<Book> getAllBooks() {
@@ -64,6 +66,12 @@ public class BookService {
 
       // The orElseGet eill create a new record if requested id is not being found
     }).orElseGet(() -> bookRepository.save(updatedBook));
+  }
+
+  public void triggerNullPointerException() {
+    String str = null;
+    // Attempt to call a method on a null object
+    int length = str.length(); // This line will throw NullPointerException
   }
 
 }

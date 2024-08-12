@@ -5,18 +5,15 @@ import jakarta.validation.Valid;
 import nl.mpdev.novi_study_material_springboot.models.Book;
 import nl.mpdev.novi_study_material_springboot.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@RestController()
 public class BookController {
 
   private final BookService bookService;
@@ -30,7 +27,8 @@ public class BookController {
 
   @GetMapping(value = "/books/{id}")
   // Since I'm  using a String for when a book is not found im return a String object so Im using Oject generic instead of Book
-  public ResponseEntity<Object> getBook(@Valid @PathVariable("id") long id) {
+  public ResponseEntity<Object> getBook(@PathVariable("id") long id) {
+    bookService.triggerNullPointerException();
     return ResponseEntity.status(HttpStatus.FOUND).body(bookService.getBook(id));
   }
 
@@ -62,24 +60,24 @@ public class BookController {
     return ResponseEntity.status(HttpStatus.CREATED).body(bookService.updateBook(id, book));
   }
 
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public Map<String, String> handleValidationExceptions(
-    MethodArgumentNotValidException ex) {
-    Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach((error) -> {
-      String fieldName = ((FieldError) error).getField();
-      String errorMessage = error.getDefaultMessage();
-      errors.put(fieldName, errorMessage);
-    });
-    return errors;
-  }
+//  @ResponseStatus(HttpStatus.BAD_REQUEST)
+//  @ExceptionHandler(MethodArgumentNotValidException.class)
+//  public Map<String, String> handleValidationExceptions(
+//    MethodArgumentNotValidException ex) {
+//    Map<String, String> errors = new HashMap<>();
+//    ex.getBindingResult().getAllErrors().forEach((error) -> {
+//      String fieldName = ((FieldError) error).getField();
+//      String errorMessage = error.getDefaultMessage();
+//      errors.put(fieldName, errorMessage);
+//    });
+//    return errors;
+//  }
 
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(EntityNotFoundException.class)
-  public Map<String, String> handleEntityNotFoundExeptions(EntityNotFoundException ex) {
-    Map<String, String> errors = new HashMap<>();
-    errors.put("404 error", ex.getMessage());
-    return errors;
-  }
+//  @ResponseStatus(HttpStatus.NOT_FOUND)
+//  @ExceptionHandler(EntityNotFoundException.class)
+//  public Map<String, String> handleEntityNotFoundExceptions(EntityNotFoundException ex) {
+//    Map<String, String> errors = new HashMap<>();
+//    errors.put("404 error", ex.getMessage());
+//    return errors;
+//  }
 }
