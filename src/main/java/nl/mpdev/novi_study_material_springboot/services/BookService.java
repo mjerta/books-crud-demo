@@ -1,53 +1,57 @@
 package nl.mpdev.novi_study_material_springboot.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import nl.mpdev.novi_study_material_springboot.exceptions.APIRequestException;
-import nl.mpdev.novi_study_material_springboot.models.Book;
+import nl.mpdev.novi_study_material_springboot.DTO.Book;
+import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
 import nl.mpdev.novi_study_material_springboot.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
 
   private final BookRepository bookRepository;
+  private final BookDTOMapper bookDTOMapper;
 
   @Autowired // This one is really needed because Spring automatically detects and injects dependencies via this constructor.
   //  However, if there are multiple constructors, you must use @Autowired to specify which constructor should be used for injection.
-  public BookService(BookRepository bookRepository) {
+  public BookService(BookRepository bookRepository, BookDTOMapper bookDTOMapper) {
     this.bookRepository = bookRepository;
+    this.bookDTOMapper = bookDTOMapper;
   }
 
-  public Book getBook(long id) {
+  public BookDTO getBook(long id) {
     // Im using orElse fluent style that trows an exception
-//    Book book = bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No book found"));
-//    return book;
-
-      return bookRepository.findById(id).orElseThrow(() -> new APIRequestException("No Book found"));
+    Book book = bookRepository.findById(id).orElseThrow(() -> new APIRequestException("No Book found"));
+    return bookDTOMapper.toDto(book);
   }
 
-  public List<Book> getAllBooks() {
-    return bookRepository.findAll();
+  public List<BookDTO> getAllBooks() {
+    List<Book> books = bookRepository.findAll();
+    return books.stream().map(bookDTOMapper::toDto).collect(Collectors.toList());
   }
 
-  public Book addBook(Book newBook) {
-    return bookRepository.save(newBook);
+  public BookDTO addBook(BookDTO bookDTO) {
+    Book newBook = bookDTOMapper.toEntity(bookDTO);
+    Map<String, String> foundBook = new HashMap<>();
+    if (bookRepository.existsBookByIsbn(bookDTO.getIsbn())) {
+      foundBook.put("ISBN", bookRepository.findBookByIsbn(bookDTO.getIsbn()).getIsbn());
+    }
+    if (bookRepository.existsBookByMainTitle(bookDTO.getMainTitle())) {
+      foundBook.put("Title", bookRepository.findBookByMainTitle(bookDTO.getMainTitle()).getMainTitle());
+    }
+    if (!foundBook.isEmpty()) {
+      throw new APIRequestException(foundBook);
+    }
+    return bookDTOMapper.toDto(bookRepository.save(newBook));
   }
 
   public void deleteBook(long id) {
     if (!bookRepository.existsById(id)) {
-//      throw new EntityNotFoundException("No book found");
-      throw new APIRequestException("No book found");
+      throw new APIRequestException("No books are found");
     }
     bookRepository.deleteById(id);
   }
@@ -56,16 +60,20 @@ public class BookService {
     bookRepository.deleteAll();
   }
 
-  public Book updateBook(long id, Book updatedBook) {
+  public BookDTO updateBook(long id, BookDTO updatedBook) {
+    Book newBook = bookDTOMapper.toEntity(updatedBook);
     return bookRepository.findById(id).map(book -> {
       // Update fields
       book.setMainTitle(updatedBook.getMainTitle());
       book.setIsbn(updatedBook.getIsbn());
-      book.setGenre(updatedBook.getGenre());
-      return bookRepository.save(book);
+      //book.setGenre(newBook.getGenre());
+      return bookDTOMapper.toDto(bookRepository.save(book));
 
-      // The orElseGet eill create a new record if requested id is not being found
-    }).orElseGet(() -> bookRepository.save(updatedBook));
+      // The orElseGet will create a new record if requested id is not being found
+    }).orElseGet(() -> {
+        return bookDTOMapper.toDto(bookRepository.save(newBook));
+      }
+    );
   }
 
   public void triggerNullPointerException() {
