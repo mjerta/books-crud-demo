@@ -1,7 +1,5 @@
-package nl.mpdev.novi_study_material_springboot.DTO;
+package nl.mpdev.novi_study_material_springboot.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.Data;
 
 //@JsonDeserialize

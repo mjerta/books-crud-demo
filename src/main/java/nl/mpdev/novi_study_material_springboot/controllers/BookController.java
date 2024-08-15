@@ -1,7 +1,7 @@
 package nl.mpdev.novi_study_material_springboot.controllers;
 
 import jakarta.validation.Valid;
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
+import nl.mpdev.novi_study_material_springboot.models.BookDTO;
 import nl.mpdev.novi_study_material_springboot.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -2,7 +2,7 @@ package nl.mpdev.novi_study_material_springboot.services;
 
 import nl.mpdev.novi_study_material_springboot.exceptions.APIRequestException;
 import nl.mpdev.novi_study_material_springboot.DTO.Book;
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
+import nl.mpdev.novi_study_material_springboot.models.BookDTO;
 import nl.mpdev.novi_study_material_springboot.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
