@@ -2,9 +2,9 @@ package nl.mpdev.novi_study_material_springboot.services;
 
 import nl.mpdev.novi_study_material_springboot.DTO.Book;
 import nl.mpdev.novi_study_material_springboot.models.BookDTO;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class BookDTOMapper {
 
   public BookDTO toDto(Book book) {

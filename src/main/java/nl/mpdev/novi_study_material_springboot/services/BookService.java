@@ -34,19 +34,18 @@ public class BookService {
     return books.stream().map(bookDTOMapper::toDto).collect(Collectors.toList());
   }
 
-  public BookDTO addBook(BookDTO bookDTO) {
-    Book newBook = bookDTOMapper.toEntity(bookDTO);
+  public BookDTO addBook(Book book) {
     Map<String, String> foundBook = new HashMap<>();
-    if (bookRepository.existsBookByIsbn(bookDTO.getIsbn())) {
-      foundBook.put("ISBN", bookRepository.findBookByIsbn(bookDTO.getIsbn()).getIsbn());
+    if (bookRepository.existsBookByIsbn(book.getIsbn())) {
+      foundBook.put("ISBN", bookRepository.findBookByIsbn(book.getIsbn()).getIsbn());
     }
-    if (bookRepository.existsBookByMainTitle(bookDTO.getMainTitle())) {
-      foundBook.put("Title", bookRepository.findBookByMainTitle(bookDTO.getMainTitle()).getMainTitle());
+    if (bookRepository.existsBookByMainTitle(book.getMainTitle())) {
+      foundBook.put("Title", bookRepository.findBookByMainTitle(book.getMainTitle()).getMainTitle());
     }
     if (!foundBook.isEmpty()) {
       throw new APIRequestException(foundBook);
     }
-    return bookDTOMapper.toDto(bookRepository.save(newBook));
+    return bookDTOMapper.toDto(bookRepository.save(book));
   }
 
   public void deleteBook(long id) {

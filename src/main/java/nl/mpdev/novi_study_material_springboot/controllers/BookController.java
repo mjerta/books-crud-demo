@@ -2,6 +2,7 @@ package nl.mpdev.novi_study_material_springboot.controllers;
 
 import jakarta.validation.Valid;
 import nl.mpdev.novi_study_material_springboot.models.BookDTO;
+import nl.mpdev.novi_study_material_springboot.services.BookDTOMapper;
 import nl.mpdev.novi_study_material_springboot.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,14 @@ import java.util.List;
 public class BookController {
 
   private final BookService bookService;
+  private final BookDTOMapper bookDTOMapper;
 
   @Autowired // This one is not really needed because Spring automatically detects and injects dependencies via this constructor.
   // If you just using field injection you could use that above the field and not use a constructor or setter.
   //  However, if there are multiple constructors, you must use @Autowired to specify which constructor should be used for injection.
-  public BookController(BookService bookService, View error) {
+  public BookController(BookService bookService, BookDTOMapper bookDTOMapper) {
     this.bookService = bookService;
+    this.bookDTOMapper = bookDTOMapper;
   }
 
   @GetMapping(value = "/books/{id}")
@@ -38,7 +41,7 @@ public class BookController {
 
   @PostMapping(value = "/books/addbook/")
   public ResponseEntity<BookDTO> addBook(@Valid @RequestBody BookDTO book) {
-    return ResponseEntity.status(HttpStatus.OK).body(bookService.addBook(book));
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.addBook(bookDTOMapper.toEntity(book)));
   }
 
   @DeleteMapping(value = "/books/deletebook/{id}")
