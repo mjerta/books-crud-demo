@@ -109,7 +109,7 @@ public class APIExceptionsHandler {
     }
     errors.put("Exception class being trown:", ex.getClass().getName());
     APIException apiException = new APIException(
-      "API Request Error",
+      "API Request Error2",
       status,
       ZonedDateTime.now(ZoneId.of("Z")),
       errors

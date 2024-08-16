@@ -1,8 +1,9 @@
 package nl.mpdev.novi_study_material_springboot.services;
 
+import nl.mpdev.novi_study_material_springboot.DTO.BookDTOMapper;
 import nl.mpdev.novi_study_material_springboot.exceptions.APIRequestException;
-import nl.mpdev.novi_study_material_springboot.DTO.Book;
-import nl.mpdev.novi_study_material_springboot.models.BookDTO;
+import nl.mpdev.novi_study_material_springboot.models.Book;
+import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
 import nl.mpdev.novi_study_material_springboot.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,7 @@ public class BookService {
     bookRepository.deleteAll();
   }
 
-  public BookDTO updateBook(long id, BookDTO updatedBook) {
-    Book newBook = bookDTOMapper.toEntity(updatedBook);
+  public BookDTO updateBook(long id, Book updatedBook) {
     return bookRepository.findById(id).map(book -> {
       // Update fields
       book.setMainTitle(updatedBook.getMainTitle());
@@ -70,11 +70,13 @@ public class BookService {
 
       // The orElseGet will create a new record if requested id is not being found
     }).orElseGet(() -> {
-        return bookDTOMapper.toDto(bookRepository.save(newBook));
+        return bookDTOMapper.toDto(bookRepository.save(updatedBook));
       }
     );
   }
 
+
+  // Method to simulate an triggernull expecetion
   public void triggerNullPointerException() {
     String str = null;
     // Attempt to call a method on a null object

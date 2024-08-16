@@ -1,25 +1,27 @@
-package nl.mpdev.novi_study_material_springboot.DTO;
+package nl.mpdev.novi_study_material_springboot.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 @Entity // Is from hibernate. Is used to translate java en spring code to sql.
 // Hibernate is an ORM: Object Relational Mapping.
-@Table(name = "books", uniqueConstraints = {
-  @UniqueConstraint(columnNames = {"isbn", "title"})
+@Table(name = "books", uniqueConstraints = {@UniqueConstraint(columnNames = {"isbn", "title"})
 }) // Is used to for example to change the table name.
 public class Book {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY) // When you not use the parameters it defaults to strategy = GenerationType.AUTO
   private long id;
-  @Column(unique = true)
+  @Column(unique = true, length = 13)
+  @NotBlank(message = "ISBN is mandatory")
+  @Size(min = 10, max = 13, message = "ISBN must be between 10 and 13 characters long")
   private String isbn;
   @NotBlank(message = "Title is mandatory")
-  @Column(name = "title", unique = true) // Maps to the "title" column in the database
+  @Size(min = 2, max = 20, message = "Title must be between 2 and 20 characters long")
+  @Column(name = "title", unique = true, length = 20) // Ensure the length matches the Size annotation
   private String mainTitle;
   private String genre;
   private String author;

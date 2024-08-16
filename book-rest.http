@@ -1,0 +1,49 @@
+### GET request to example server
+GET http://localhost:8080/api/books/
+
+
+### addBooks
+
+POST localhost:8080/api/books/addbook/
+Content-Type: application/json
+
+{
+  "isbn": "1234567890123",
+  "mainTitle": "Spring Boot Basics",
+  "genre": "Technology",
+  "author": "John Doe"
+}
+
+### Delete all records
+
+DELETE localhost:8080/api/books/deletebooks/
+
+
+
+
+
+### PagingAndSortingRepository  findBookByMainTitle
+GET http://localhost:8080/book-resource/search/findBookByMainTitle?title=Spring&Boot%Basi
+
+### PagingAndSortingRepository
+GET localhost:8080/book-resource
+
+###
+GET localhost:8080/book-resource/2
+
+###
+POST localhost:8080/book-resource
+Content-Type: application/json
+
+{
+  "isbn": "1234567890125",
+  "mainTitle": "Spring Boot Basi",
+  "genre": "Technology",
+  "author": "maarten postma"
+}
+
+### Delete record by id in book Reource
+DELETE http://localhost:8080/book-resource/2
+
+###
+GET localhost:8080

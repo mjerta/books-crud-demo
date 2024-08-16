@@ -1,14 +1,13 @@
 package nl.mpdev.novi_study_material_springboot.controllers;
 
 import jakarta.validation.Valid;
-import nl.mpdev.novi_study_material_springboot.models.BookDTO;
-import nl.mpdev.novi_study_material_springboot.services.BookDTOMapper;
+import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
+import nl.mpdev.novi_study_material_springboot.DTO.BookDTOMapper;
 import nl.mpdev.novi_study_material_springboot.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.View;
 
 import java.util.List;
 
@@ -44,6 +43,11 @@ public class BookController {
     return ResponseEntity.status(HttpStatus.OK).body(bookService.addBook(bookDTOMapper.toEntity(book)));
   }
 
+  @PostMapping("/book-resource")
+  public ResponseEntity<BookDTO> addAnotherBook(@Valid @RequestBody BookDTO book) {
+    return ResponseEntity.status(HttpStatus.OK).body(bookService.addBook(bookDTOMapper.toEntity(book)));
+  }
+
   @DeleteMapping(value = "/books/deletebook/{id}")
   public ResponseEntity<Void> deleteBook(@PathVariable long id) {
     bookService.deleteBook(id);
@@ -58,7 +62,7 @@ public class BookController {
 
   @PutMapping("books/{id}")
   public ResponseEntity<BookDTO> updateBook(@PathVariable int id, @Valid  @RequestBody BookDTO book) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(bookService.updateBook(id, book));
+    return ResponseEntity.status(HttpStatus.CREATED).body(bookService.updateBook(id, bookDTOMapper.toEntity(book)));
   }
 
 //  2 examples of validation directly in the controller - which im not using. Im using globalexceptions handler

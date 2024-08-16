@@ -1,7 +1,6 @@
-package nl.mpdev.novi_study_material_springboot.services;
+package nl.mpdev.novi_study_material_springboot.DTO;
 
-import nl.mpdev.novi_study_material_springboot.DTO.Book;
-import nl.mpdev.novi_study_material_springboot.models.BookDTO;
+import nl.mpdev.novi_study_material_springboot.models.Book;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,6 +11,7 @@ public class BookDTOMapper {
     bookDTO.setId(book.getId());
     bookDTO.setIsbn(book.getIsbn());
     bookDTO.setMainTitle(book.getMainTitle());
+    bookDTO.setGenre(book.getGenre());
     return  bookDTO;
   }
 
@@ -20,6 +20,7 @@ public class BookDTOMapper {
     book.setId(bookDTO.getId());
     book.setIsbn(bookDTO.getIsbn());
     book.setMainTitle(bookDTO.getMainTitle());
+    book.setGenre(bookDTO.getGenre());
     return book;
   }
 
