@@ -1,9 +1,9 @@
-package nl.mpdev.novi_study_material_springboot.controllers;
+package nl.mpdev.books_crud_demo.controllers;
 
 import jakarta.validation.Valid;
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTOMapper;
-import nl.mpdev.novi_study_material_springboot.services.BookService;
+import nl.mpdev.books_crud_demo.DTO.books.BookDTO;
+import nl.mpdev.books_crud_demo.DTO.books.BookDTOMapper;
+import nl.mpdev.books_crud_demo.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

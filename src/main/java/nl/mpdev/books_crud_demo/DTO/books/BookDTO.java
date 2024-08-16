@@ -1,4 +1,4 @@
-package nl.mpdev.novi_study_material_springboot.DTO;
+package nl.mpdev.books_crud_demo.DTO.books;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

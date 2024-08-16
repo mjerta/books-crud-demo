@@ -1,4 +1,4 @@
-package nl.mpdev.novi_study_material_springboot;
+package nl.mpdev.books_crud_demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

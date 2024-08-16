@@ -1,8 +1,6 @@
-package nl.mpdev.novi_study_material_springboot.repositories;
+package nl.mpdev.books_crud_demo.repositories;
 
-import nl.mpdev.novi_study_material_springboot.models.Book;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import nl.mpdev.books_crud_demo.models.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

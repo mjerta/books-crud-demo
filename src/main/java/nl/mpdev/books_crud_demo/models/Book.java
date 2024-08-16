@@ -1,4 +1,4 @@
-package nl.mpdev.novi_study_material_springboot.models;
+package nl.mpdev.books_crud_demo.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@Entity // Is from hibernate. Is used to translate java en spring code to sql.
+@Entity // Is from JPA. Is used to translate java en spring code to sql.
 // Hibernate is an ORM: Object Relational Mapping.
+// Hibernate is taking care of the implementation
 @Table(name = "books", uniqueConstraints = {@UniqueConstraint(columnNames = {"isbn", "title"})
 }) // Is used to for example to change the table name.
 public class Book {

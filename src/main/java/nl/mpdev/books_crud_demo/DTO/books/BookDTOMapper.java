@@ -1,6 +1,6 @@
-package nl.mpdev.novi_study_material_springboot.DTO;
+package nl.mpdev.books_crud_demo.DTO.books;
 
-import nl.mpdev.novi_study_material_springboot.models.Book;
+import nl.mpdev.books_crud_demo.models.Book;
 import org.springframework.stereotype.Component;
 
 @Component

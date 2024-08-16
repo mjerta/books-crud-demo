@@ -1,10 +1,10 @@
-package nl.mpdev.novi_study_material_springboot.services;
+package nl.mpdev.books_crud_demo.services;
 
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTOMapper;
-import nl.mpdev.novi_study_material_springboot.exceptions.APIRequestException;
-import nl.mpdev.novi_study_material_springboot.models.Book;
-import nl.mpdev.novi_study_material_springboot.DTO.BookDTO;
-import nl.mpdev.novi_study_material_springboot.repositories.BookRepository;
+import nl.mpdev.books_crud_demo.DTO.books.BookDTOMapper;
+import nl.mpdev.books_crud_demo.exceptions.APIRequestException;
+import nl.mpdev.books_crud_demo.models.Book;
+import nl.mpdev.books_crud_demo.DTO.books.BookDTO;
+import nl.mpdev.books_crud_demo.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
