@@ -1,26 +1,18 @@
 ### GET request to example server
 GET http://localhost:8080/api/books/
 
-
 ### addBooks
-
 POST localhost:8080/api/books/addbook/
 Content-Type: application/json
 
 {
   "isbn": "1234567890123",
   "mainTitle": "Spring Boot Basics",
-  "genre": "Technology",
-  "author": "John Doe"
+  "genre": "Technology"
 }
 
 ### Delete all records
-
 DELETE localhost:8080/api/books/deletebooks/
-
-
-
-
 
 ### PagingAndSortingRepository  findBookByMainTitle
 GET http://localhost:8080/book-resource/search/findBookByMainTitle?title=Spring&Boot%Basi
@@ -28,10 +20,10 @@ GET http://localhost:8080/book-resource/search/findBookByMainTitle?title=Spring&
 ### PagingAndSortingRepository
 GET localhost:8080/book-resource
 
-###
+### PagingAndSortingRepository get an book by id
 GET localhost:8080/book-resource/2
 
-###
+### PagingAndSortingRepository addBook
 POST localhost:8080/book-resource
 Content-Type: application/json
 
