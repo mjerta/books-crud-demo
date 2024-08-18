@@ -39,3 +39,13 @@ DELETE http://localhost:8080/book-resource/2
 
 ###
 GET localhost:8080
+
+
+
+### Add record for genres
+POST localhost:8080/api/genre/
+Content-Type: application/json
+
+{
+  "genreType": "test2"
+}

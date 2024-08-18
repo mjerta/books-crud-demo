@@ -1,5 +1,6 @@
 package nl.mpdev.books_crud_demo.DTO.books;
 
+import nl.mpdev.books_crud_demo.DTO.genres.GenreDTOMapper;
 import nl.mpdev.books_crud_demo.models.Book;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ public class BookDTOMapper {
     bookDTO.setId(book.getId());
     bookDTO.setIsbn(book.getIsbn());
     bookDTO.setMainTitle(book.getMainTitle());
-    bookDTO.setGenre(book.getGenre());
+    bookDTO.setGenre((book.getGenre()));
     return  bookDTO;
   }
 

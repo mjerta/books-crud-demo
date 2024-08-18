@@ -24,7 +24,9 @@ public class Book {
   @Size(min = 2, max = 20, message = "Title must be between 2 and 20 characters long")
   @Column(name = "title", unique = true, length = 20) // Ensure the length matches the Size annotation
   private String mainTitle;
-  private String genre;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "genre_id", referencedColumnName = "id")
+  private Genre genre;
   private String author;
 
   public Book() {

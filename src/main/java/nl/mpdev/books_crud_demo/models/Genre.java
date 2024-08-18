@@ -20,6 +20,9 @@ public class Genre {
   @NotBlank
   private String GenreType;
 
+  @OneToOne(mappedBy = "genre")
+  private Book book;
+
   public Genre() {
   }
 }

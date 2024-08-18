@@ -3,6 +3,7 @@ package nl.mpdev.books_crud_demo.DTO.books;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import nl.mpdev.books_crud_demo.models.Genre;
 
 //@JsonDeserialize
 //@JsonIgnoreProperties(ignoreUnknown = false)
@@ -16,7 +17,7 @@ public class BookDTO {
   @NotBlank(message = "Title is mandatory")
   @Size(min = 2, max = 20, message = "Title must be between 2 and 20 characters long")
   private String mainTitle;
-  private String genre;
+  private Genre genre;
 
   public BookDTO() {
   }
