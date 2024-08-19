@@ -12,7 +12,6 @@ public class GenreDTO {
   @Size(min = 2, max = 20)
   @NotBlank
   private String genreType;
-
   public GenreDTO() {
   }
 }

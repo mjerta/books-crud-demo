@@ -1,18 +1,47 @@
 ### GET request to example server
 GET http://localhost:8080/api/books/
 
+### getBookGenres
+GET localhost:8080/api/booksgenres/
+
+
+
 ### addBooks
 POST localhost:8080/api/books/addbook/
 Content-Type: application/json
 
 {
-  "isbn": "1234567890123",
-  "mainTitle": "Spring Boot Basics",
-  "genre": "Technology"
+  "isbn": "978-1-2345-6789-0",
+  "mainTitle": "Mystery of the Lost City",
+  "genreId": 5
 }
 
 ### Delete all records
 DELETE localhost:8080/api/books/deletebooks/
+
+
+### Update record
+PUT localhost:8080/api/books/1
+Content-Type: application/json
+
+{
+  "isbn": "978-1-2345-6789-0",
+  "mainTitle": "Mystery of the Lost City",
+  "genreId": 4
+}
+
+### Add record for genres
+POST localhost:8080/api/genre/
+Content-Type: application/json
+
+{
+  "genreType": "Mystery"
+}
+
+
+
+
+
 
 ### PagingAndSortingRepository  findBookByMainTitle
 GET http://localhost:8080/book-resource/search/findBookByMainTitle?title=Spring&Boot%Basi
@@ -42,10 +71,3 @@ GET localhost:8080
 
 
 
-### Add record for genres
-POST localhost:8080/api/genre/
-Content-Type: application/json
-
-{
-  "genreType": "test2"
-}
