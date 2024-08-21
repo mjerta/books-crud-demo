@@ -1,5 +1,6 @@
 ### GET request to example server
 GET http://localhost:8080/api/books/
+Authorization: Basic user 34135cd7-c7ff-4507-809e-f9d110b220ac
 
 ### getBookGenres
 GET localhost:8080/api/booksgenres/
