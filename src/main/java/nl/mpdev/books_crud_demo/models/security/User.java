@@ -12,7 +12,7 @@ import java.util.Set;
 public class User {
   @Id
   @Column(nullable = false, unique = true)
-  private String userName;
+  private String username;
   @Column(nullable = false)
   private String password;
   @Column(nullable = false)

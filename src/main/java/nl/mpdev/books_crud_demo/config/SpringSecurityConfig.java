@@ -25,8 +25,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+//@EnableWebSecurity
 public class SpringSecurityConfig {
 
   private final DataSource dataSource;
@@ -43,41 +42,46 @@ public class SpringSecurityConfig {
 
   @Bean
   JdbcUserDetailsManager users(DataSource dataSource) {
-    UserDetails user = User.builder()
-      .username("user")
-      .password(passwordEncoder().encode("password"))
-      .roles("USER")
-      .build();
-    UserDetails admin = User.builder()
-      .username("admin")
-      .password(passwordEncoder().encode("password"))
-      .roles("USER", "ADMIN")
-      .build();
     JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-    users.createUser(user);
-    users.createUser(admin);
+    if (!users.userExists("user")) {
+      UserDetails user = User.builder()
+        .username("user")
+        .password(passwordEncoder().encode("password"))
+        .roles("USER")
+        .build();
+      users.createUser(user);
+    }
+    if (!users.userExists("admin")) {
+      UserDetails admin = User.builder()
+        .username("admin")
+        .password(passwordEncoder().encode("password"))
+        .roles("USER", "ADMIN")
+        .build();
+      users.createUser(admin);
+    }
+
     return users;
   }
 
-  @Bean
-  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-    authenticationManagerBuilder
-      .jdbcAuthentication()
-      .dataSource(dataSource)
-      .passwordEncoder(passwordEncoder())
-      .usersByUsernameQuery(
-        "SELECT user_name, password, enabled" +
-          " FROM users" +
-          " WHERE user_name=?"
-      )
-      .authoritiesByUsernameQuery(
-        "SELECT username, authority" +
-          " FROM authorities " +
-          " WHERE username=?"
-      );
-    return authenticationManagerBuilder.build();
-  }
+//  @Bean
+//  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+//    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+//    authenticationManagerBuilder
+//      .jdbcAuthentication()
+//      .dataSource(dataSource)
+//      .passwordEncoder(passwordEncoder())
+//      .usersByUsernameQuery(
+//        "SELECT username, password, enabled" +
+//          " FROM users" +
+//          " WHERE username=?"
+//      )
+//      .authoritiesByUsernameQuery(
+//        "SELECT username, authority" +
+//          " FROM authorities " +
+//          " WHERE username=?"
+//      );
+//    return authenticationManagerBuilder.build();
+//  }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
