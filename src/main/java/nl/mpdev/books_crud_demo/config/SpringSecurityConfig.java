@@ -2,6 +2,7 @@ package nl.mpdev.books_crud_demo.config;
 
 import nl.mpdev.books_crud_demo.services.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +37,18 @@ public class SpringSecurityConfig {
   private final DataSource dataSource;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  @Value("${APP_USER_USERNAME}")
+  private String userUsername;
+
+  @Value("${APP_USER_PASSWORD}")
+  private String userPassword;
+
+  @Value("${APP_ADMIN_USERNAME}")
+  private String adminUsername;
+
+  @Value("${APP_ADMIN_PASSWORD}")
+  private String adminPassword;
+
   @Autowired
   public SpringSecurityConfig(DataSource dataSource, @Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
 
@@ -47,16 +61,13 @@ public class SpringSecurityConfig {
     return new BCryptPasswordEncoder();
   }
 
-
-
-
   @Bean
-  public UserDetailsManager users() {
+  public UserDetailsService users() {
     JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-    if (!users.userExists("user")) {
+    if (!users.userExists(userUsername)) {
       UserDetails user = User.builder()
         .username("user")
-        .password(passwordEncoder().encode("password"))
+        .password(passwordEncoder().encode(userPassword))
         .roles("USER")
         .build();
       users.createUser(user);
@@ -73,28 +84,27 @@ public class SpringSecurityConfig {
     return users;
   }
 
-
-
   // Step 3: Initialize dependent beans next
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService) {
     return new JwtAuthenticationFilter(jwtService, userDetailsService);
   }
+
   @Bean
   protected SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-    http
+    return http
       .csrf(csrf -> csrf.disable())
-
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/info").hasAuthority("WRITE_PRIVILEGE")
+        .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "USER")
         .anyRequest().denyAll())
       .httpBasic(Customizer.withDefaults())
       .formLogin(Customizer.withDefaults())
-      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+      .sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
 
-    return http.build();
   }
 
 //  private final DataSource dataSource;

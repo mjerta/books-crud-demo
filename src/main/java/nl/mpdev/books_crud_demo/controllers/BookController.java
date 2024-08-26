@@ -1,5 +1,6 @@
 package nl.mpdev.books_crud_demo.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import nl.mpdev.books_crud_demo.DTO.books.BookIncomingDTO;
 import nl.mpdev.books_crud_demo.DTO.books.BookDTOMapper;
@@ -9,6 +10,7 @@ import nl.mpdev.books_crud_demo.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +26,17 @@ public class BookController {
   //  However, if there are multiple constructors, you must use @Autowired to specify which constructor should be used for injection.
   public BookController(BookService bookService, BookDTOMapper bookDTOMapper) {
     this.bookService = bookService;
+  }
+
+  @GetMapping("/csrf-token")
+  public CsrfToken getCsrfToken(HttpServletRequest request) {
+
+    return request.getAttribute("_csrf") != null ? (CsrfToken) request.getAttribute("_csrf") : null;
+  }
+
+  @GetMapping(value = "/test")
+  public String test(HttpServletRequest request) {
+    return "Hello World" + request.getSession().getId();
   }
 
   @GetMapping(value = "/books/{id}")
