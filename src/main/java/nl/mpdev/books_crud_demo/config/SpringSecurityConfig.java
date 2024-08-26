@@ -1,8 +1,10 @@
 package nl.mpdev.books_crud_demo.config;
 
+import nl.mpdev.books_crud_demo.services.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -14,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -25,14 +28,18 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import javax.sql.DataSource;
 
 @Configuration
-//@EnableWebSecurity
+@EnableWebSecurity // This annotation is not needed in Spring Boot 2.0 (Spring Security 5.0) and later versions of Spring Boot because
+// Spring Boot automatically enables Spring Security.
 public class SpringSecurityConfig {
 
   private final DataSource dataSource;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Autowired
-  public SpringSecurityConfig(DataSource dataSource) {
+  public SpringSecurityConfig(DataSource dataSource, @Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+
     this.dataSource = dataSource;
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
   @Bean
@@ -40,8 +47,11 @@ public class SpringSecurityConfig {
     return new BCryptPasswordEncoder();
   }
 
+
+
+
   @Bean
-  JdbcUserDetailsManager users(DataSource dataSource) {
+  public UserDetailsManager users() {
     JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
     if (!users.userExists("user")) {
       UserDetails user = User.builder()
@@ -55,13 +65,71 @@ public class SpringSecurityConfig {
       UserDetails admin = User.builder()
         .username("admin")
         .password(passwordEncoder().encode("password"))
-        .roles("USER", "ADMIN")
+        .authorities("ROLE_USER", "READ_PRIVILEGE", "WRITE_PRIVILEGE", "DELETE_PRIVILEGE", "ROLE_ADMIN", "ROLE_USER")
         .build();
+
       users.createUser(admin);
     }
-
     return users;
   }
+
+
+
+  // Step 3: Initialize dependent beans next
+  @Bean
+  public JwtAuthenticationFilter jwtAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService) {
+    return new JwtAuthenticationFilter(jwtService, userDetailsService);
+  }
+  @Bean
+  protected SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    http
+      .csrf(csrf -> csrf.disable())
+
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
+        .requestMatchers("/info").hasAuthority("WRITE_PRIVILEGE")
+        .anyRequest().denyAll())
+      .httpBasic(Customizer.withDefaults())
+      .formLogin(Customizer.withDefaults())
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+  }
+
+//  private final DataSource dataSource;
+//
+//  @Autowired
+//  public SpringSecurityConfig(DataSource dataSource) {
+//    this.dataSource = dataSource;
+//  }
+//
+//  @Bean
+//  public PasswordEncoder passwordEncoder() {
+//    return new BCryptPasswordEncoder();
+//  }
+
+//  @Bean
+//  public JdbcUserDetailsManager users(DataSource dataSource) {
+//    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
+//    if (!users.userExists("user")) {
+//      UserDetails user = User.builder()
+//        .username("user")
+//        .password(passwordEncoder().encode("password"))
+//        .roles("USER")
+//        .build();
+//      users.createUser(user);
+//    }
+//    if (!users.userExists("admin")) {
+//      UserDetails admin = User.builder()
+//        .username("admin")
+//        .password(passwordEncoder().encode("password"))
+//        .roles("USER", "ADMIN")
+//        .build();
+//      users.createUser(admin);
+//    }
+//    return users;
+//  }
 
 //  @Bean
 //  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
@@ -83,22 +151,22 @@ public class SpringSecurityConfig {
 //    return authenticationManagerBuilder.build();
 //  }
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-      .csrf(csrf -> csrf.disable())
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/api/**").hasRole("USER")
-        .requestMatchers(HttpMethod.GET, "/info").hasRole("USER")
-        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER")
-        .requestMatchers("/admins").hasRole("ADMIN")
-        .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-        .requestMatchers("/authenticate").permitAll()
-        .anyRequest().denyAll())
-      .httpBasic(Customizer.withDefaults());
-
-    return http.build();
-  }
+//  @Bean
+//  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//    http
+//      .csrf(csrf -> csrf.disable())
+//      .authorizeHttpRequests(auth -> auth
+//        .requestMatchers("/api/**").hasRole("USER")
+//        .requestMatchers(HttpMethod.GET, "/info").hasRole("USER")
+//        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER")
+//        .requestMatchers("/admins").hasRole("ADMIN")
+//        .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
+//        .requestMatchers("/authenticate").permitAll()
+//        .anyRequest().denyAll())
+//      .httpBasic(Customizer.withDefaults());
+//
+//    return http.build();
+//  }
 //
 //  @Bean
 //  UserDetailsManager users(DataSource dataSource) {

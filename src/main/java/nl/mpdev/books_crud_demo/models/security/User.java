@@ -2,6 +2,7 @@ package nl.mpdev.books_crud_demo.models.security;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,5 +25,7 @@ public class User {
     orphanRemoval = true,
     fetch = FetchType.EAGER)
   private Set<Authority> authorities = new HashSet<>();
+
+
 
 }
