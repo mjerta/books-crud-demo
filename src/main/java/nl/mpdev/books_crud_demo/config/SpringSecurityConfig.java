@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -20,6 +22,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -35,7 +38,7 @@ import javax.sql.DataSource;
 public class SpringSecurityConfig {
 
   private final DataSource dataSource;
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+//  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Value("${APP_USER_USERNAME}")
   private String userUsername;
@@ -49,16 +52,30 @@ public class SpringSecurityConfig {
   @Value("${APP_ADMIN_PASSWORD}")
   private String adminPassword;
 
+
   @Autowired
-  public SpringSecurityConfig(DataSource dataSource, @Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+  UserDetailsService userDetailsService;
+
+  @Autowired
+//  public SpringSecurityConfig(DataSource dataSource, JwtAuthenticationFilter jwtAuthenticationFilter) {
+  public SpringSecurityConfig(DataSource dataSource) {
 
     this.dataSource = dataSource;
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+//    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+    provider.setUserDetailsService(users());
+    return provider;
   }
 
   @Bean
@@ -100,7 +117,8 @@ public class SpringSecurityConfig {
         .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "USER")
         .anyRequest().denyAll())
       .httpBasic(Customizer.withDefaults())
-      .formLogin(Customizer.withDefaults())
+//      .formLogin(Customizer.withDefaults())
+//      .logout(logout -> logout.logoutSuccessUrl("/"))
       .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
