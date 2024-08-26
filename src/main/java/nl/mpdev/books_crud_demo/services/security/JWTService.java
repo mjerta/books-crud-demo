@@ -1,4 +1,4 @@
-package nl.mpdev.books_crud_demo.services;
+package nl.mpdev.books_crud_demo.services.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

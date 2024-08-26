@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -150,6 +151,25 @@ public class APIExceptionsHandler {
     errors.put("Exception class being trown:", ex.getClass().getName());
     APIException apiException = new APIException(
       "Invalid property validation",
+      status,
+      ZonedDateTime.now(ZoneId.of("Z")),
+      errors
+    );
+    return new ResponseEntity<>(apiException, status);
+  }
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+    Map<String, String> errors = new HashMap<>();
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    errors.put("message", "An unexpected error occurred: " + ex.getMessage());
+    if (ex.getCause() != null) {
+      errors.put("Cause", ex.getCause().getMessage());
+      errors.put("Thrown by", ex.getCause().getClass().getName());
+    }
+    errors.put("Exception class being trown:", ex.getClass().getName());
+    APIException apiException = new APIException(
+      "Username not found",
       status,
       ZonedDateTime.now(ZoneId.of("Z")),
       errors

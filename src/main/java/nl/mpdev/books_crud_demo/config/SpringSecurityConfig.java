@@ -1,6 +1,6 @@
 package nl.mpdev.books_crud_demo.config;
 
-import nl.mpdev.books_crud_demo.services.JWTService;
+import nl.mpdev.books_crud_demo.services.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,23 +12,17 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import javax.sql.DataSource;
 
@@ -38,82 +32,54 @@ import javax.sql.DataSource;
 public class SpringSecurityConfig {
 
   private final DataSource dataSource;
-//  private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-  @Value("${APP_USER_USERNAME}")
-  private String userUsername;
-
-  @Value("${APP_USER_PASSWORD}")
-  private String userPassword;
-
-  @Value("${APP_ADMIN_USERNAME}")
-  private String adminUsername;
-
-  @Value("${APP_ADMIN_PASSWORD}")
-  private String adminPassword;
-
-
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
   @Autowired
   UserDetailsService userDetailsService;
 
+  // the @Value annotation is used to inject values from the application.properties file
+  // The could be used to set the default user and admin
+  @Value("${APP_USER_USERNAME}")
+  private String userUsername;
+  @Value("${APP_USER_PASSWORD}")
+  private String userPassword;
+  @Value("${APP_ADMIN_USERNAME}")
+  private String adminUsername;
+  @Value("${APP_ADMIN_PASSWORD}")
+  private String adminPassword;
+
   @Autowired
-//  public SpringSecurityConfig(DataSource dataSource, JwtAuthenticationFilter jwtAuthenticationFilter) {
-  public SpringSecurityConfig(DataSource dataSource) {
+  public SpringSecurityConfig(DataSource dataSource, @Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+//  public SpringSecurityConfig(DataSource dataSource) {
 
     this.dataSource = dataSource;
-//    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
+  // Bean for the password encoder to encode the password
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
-
+  // The userDetailsService is custom and is autowired als a field in this class, i coulld however use constructor injection
+// The main benifits:  Custom Authentication Logic, Flexibility, Integration, Reusability, Control
+  //The UserDetailsService is can not be used in combination with this method
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-    provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
-    provider.setUserDetailsService(users());
+    provider.setPasswordEncoder(passwordEncoder());
+    provider.setUserDetailsService(userDetailsService);
     return provider;
   }
-
+// the filterChain method is used to configure the security filter chain
   @Bean
-  public UserDetailsService users() {
-    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-    if (!users.userExists(userUsername)) {
-      UserDetails user = User.builder()
-        .username("user")
-        .password(passwordEncoder().encode(userPassword))
-        .roles("USER")
-        .build();
-      users.createUser(user);
-    }
-    if (!users.userExists("admin")) {
-      UserDetails admin = User.builder()
-        .username("admin")
-        .password(passwordEncoder().encode("password"))
-        .authorities("ROLE_USER", "READ_PRIVILEGE", "WRITE_PRIVILEGE", "DELETE_PRIVILEGE", "ROLE_ADMIN", "ROLE_USER")
-        .build();
-
-      users.createUser(admin);
-    }
-    return users;
-  }
-
-  // Step 3: Initialize dependent beans next
-  @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService) {
-    return new JwtAuthenticationFilter(jwtService, userDetailsService);
-  }
-
-  @Bean
-  protected SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+  protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/info").hasAuthority("WRITE_PRIVILEGE")
+        .requestMatchers(HttpMethod.POST, "/register").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "USER")
         .anyRequest().denyAll())
       .httpBasic(Customizer.withDefaults())
@@ -123,27 +89,18 @@ public class SpringSecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
 
-  }
-
-//  private final DataSource dataSource;
-//
-//  @Autowired
-//  public SpringSecurityConfig(DataSource dataSource) {
-//    this.dataSource = dataSource;
-//  }
-//
+  //This is the default way to create a user
+  //This is not needed if you use the JdbcUserDetailsManager
+  //This is not needed if you use the AuthenticationProvider
+  // This is mainly used for setting up a default user
+  // Also the default provider is overtaken by the JdbcUserDetailsManager if you use it. So the jdbc one is used
 //  @Bean
-//  public PasswordEncoder passwordEncoder() {
-//    return new BCryptPasswordEncoder();
-//  }
-
-//  @Bean
-//  public JdbcUserDetailsManager users(DataSource dataSource) {
+//  public UserDetailsService users() {
 //    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-//    if (!users.userExists("user")) {
+//    if (!users.userExists(userUsername)) {
 //      UserDetails user = User.builder()
 //        .username("user")
-//        .password(passwordEncoder().encode("password"))
+//        .password(passwordEncoder().encode(userPassword))
 //        .roles("USER")
 //        .build();
 //      users.createUser(user);
@@ -152,13 +109,42 @@ public class SpringSecurityConfig {
 //      UserDetails admin = User.builder()
 //        .username("admin")
 //        .password(passwordEncoder().encode("password"))
-//        .roles("USER", "ADMIN")
+//        .authorities("ROLE_USER", "READ_PRIVILEGE", "WRITE_PRIVILEGE", "DELETE_PRIVILEGE", "ROLE_ADMIN", "ROLE_USER")
 //        .build();
+//
 //      users.createUser(admin);
 //    }
 //    return users;
 //  }
 
+// This could be use if there is circular dependency in combination with the method below
+// However you could also put the lazy annotation on the dependency injection in the constructor
+//  @Bean
+//  public JwtAuthenticationFilter jwtAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService) {
+//    return new JwtAuthenticationFilter(jwtService, userDetailsService);
+//  }
+
+  //  @Bean
+//  public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService, UserService userService) throws Exception {
+//    http
+//      .httpBasic(hp -> hp.disable())
+//      .authorizeHttpRequests(auth -> auth
+//        .requestMatchers("/albums/**").hasAnyRole("USER")
+//        .anyRequest().denyAll())
+//      .addFilterBefore(new JwtRequestFilter(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
+//      .csrf(csrf -> csrf.disable())
+//      .cors(cors -> {
+//      })
+//      .sessionManagement(session ->
+//        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//    ;
+//    return http.build();
+//  }
+
+
+  }
+
+  //Benificial because of: Centralized Configuration, Custom Queries, Flexibility
 //  @Bean
 //  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 //    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -179,114 +165,4 @@ public class SpringSecurityConfig {
 //    return authenticationManagerBuilder.build();
 //  }
 
-//  @Bean
-//  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//    http
-//      .csrf(csrf -> csrf.disable())
-//      .authorizeHttpRequests(auth -> auth
-//        .requestMatchers("/api/**").hasRole("USER")
-//        .requestMatchers(HttpMethod.GET, "/info").hasRole("USER")
-//        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER")
-//        .requestMatchers("/admins").hasRole("ADMIN")
-//        .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-//        .requestMatchers("/authenticate").permitAll()
-//        .anyRequest().denyAll())
-//      .httpBasic(Customizer.withDefaults());
-//
-//    return http.build();
-//  }
-//
-//  @Bean
-//  UserDetailsManager users(DataSource dataSource) {
-//    UserDetails user = User.builder()
-//      .username("user")
-//      .password(passwordEncoder().encode("password"))
-//      .roles("USER")
-//      .build();
-//    UserDetails admin = User.builder()
-//      .username("admin")
-//      .password(passwordEncoder().encode("password"))
-//      .roles("USER", "ADMIN")
-//      .build();
-//    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-//    users.createUser(user);
-//    users.createUser(admin);
-//    return users;
-//  }
-
-//  @Bean
-//  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-
-//    authenticationManagerBuilder.inMemoryAuthentication()
-//      .withUser("user")
-//      .password(passwordEncoder()
-//        .encode("password"))
-//      .roles("USER")
-//      .and()
-//      .withUser("admin")
-//      .password(passwordEncoder()
-//        .encode("password"))
-//      .roles("ADMIN");
-
-//    return authenticationManagerBuilder.build();
-//  }
-
-//  @Bean
-//  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//    http
-//      .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-//      .csrf(csrf -> csrf.disable())
-//      .httpBasic(Customizer.withDefaults())
-//      .cors(Customizer.withDefaults())
-//      .authorizeHttpRequests(auth -> auth
-//        .requestMatchers(HttpMethod.GET, "/info").hasRole("USER")
-//        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER")
-//        .requestMatchers("/admins").hasAuthority("ROLE_ADMIN")
-//        .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-//        .requestMatchers("/authenticate").permitAll()
-//        .anyRequest().denyAll()
-//      )
-//      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//    return http.build();
-//  }
-
-//  @Bean
-//  protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//
-//    http
-//      .csrf().disable()
-//      .httpBasic().disable()
-//      .cors().and()
-//      .authorizeHttpRequests()
-//      .requestMatchers(HttpMethod.GET, "/info").hasRole("USER")
-//      .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER")
-//      .requestMatchers("/admins").hasAuthority("ROLE_ADMIN")
-//      .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-//      .requestMatchers("/authenticate").permitAll()
-//      .anyRequest().denyAll()
-//      .and()
-//      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//
-//    return  http.build();
-//
-//  }
-
-//  @Bean
-//  public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService, UserService userService) throws Exception {
-//    http
-//      .httpBasic(hp -> hp.disable())
-//      .authorizeHttpRequests(auth -> auth
-//        .requestMatchers("/albums/**").hasAnyRole("USER")
-//        .anyRequest().denyAll())
-//      .addFilterBefore(new JwtRequestFilter(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
-//      .csrf(csrf -> csrf.disable())
-//      .cors(cors -> {
-//      })
-//      .sessionManagement(session ->
-//        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//    ;
-//    return http.build();
-//  }
 }
