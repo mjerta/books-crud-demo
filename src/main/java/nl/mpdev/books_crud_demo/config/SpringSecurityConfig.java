@@ -86,6 +86,7 @@ public class SpringSecurityConfig {
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/login").permitAll()
         .requestMatchers("/register").permitAll()
+        .requestMatchers("/logout").permitAll()
         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/info").hasAuthority("WRITE_PRIVILEGE")
         .requestMatchers(HttpMethod.POST, "/register").hasAnyRole("ADMIN", "USER")
@@ -93,9 +94,13 @@ public class SpringSecurityConfig {
         .anyRequest().denyAll())
       .httpBasic(Customizer.withDefaults())
 //      .formLogin(Customizer.withDefaults())
-//      .logout(logout -> logout.logoutSuccessUrl("/"))
+      .logout(logout -> logout
+        .logoutSuccessUrl("/")
+        .permitAll()
+      )
+
       .sessionManagement(session -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // This is needed to make the application stateless , so no session is created , this is needed for JWT , because JWT is stateless
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
   }
 
