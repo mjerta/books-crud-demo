@@ -65,13 +65,13 @@ public class SpringSecurityConfig {
   // The userDetailsService is custom and is autowired als a field in this class, i coulld however use constructor injection
 // The main benifits:  Custom Authentication Logic, Flexibility, Integration, Reusability, Control
   //The UserDetailsService is can not be used in combination with this method
-//  @Bean
-//  public AuthenticationProvider authenticationProvider() {
-//    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-//    provider.setPasswordEncoder(passwordEncoder());
-//    provider.setUserDetailsService(userDetailsService);
-//    return provider;
-//  }
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setPasswordEncoder(passwordEncoder());
+    provider.setUserDetailsService(userDetailsService);
+    return provider;
+  }
 
 
   @Bean public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
