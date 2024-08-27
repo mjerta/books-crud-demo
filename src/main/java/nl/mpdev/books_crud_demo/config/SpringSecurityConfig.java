@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -64,19 +65,27 @@ public class SpringSecurityConfig {
   // The userDetailsService is custom and is autowired als a field in this class, i coulld however use constructor injection
 // The main benifits:  Custom Authentication Logic, Flexibility, Integration, Reusability, Control
   //The UserDetailsService is can not be used in combination with this method
-  @Bean
-  public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-    provider.setPasswordEncoder(passwordEncoder());
-    provider.setUserDetailsService(userDetailsService);
-    return provider;
+//  @Bean
+//  public AuthenticationProvider authenticationProvider() {
+//    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+//    provider.setPasswordEncoder(passwordEncoder());
+//    provider.setUserDetailsService(userDetailsService);
+//    return provider;
+//  }
+
+
+  @Bean public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    return configuration.getAuthenticationManager();
   }
-// the filterChain method is used to configure the security filter chain
+
+  // the filterChain method is used to configure the security filter chain
   @Bean
   protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/login").permitAll()
+        .requestMatchers("/register").permitAll()
         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/info").hasAuthority("WRITE_PRIVILEGE")
         .requestMatchers(HttpMethod.POST, "/register").hasAnyRole("ADMIN", "USER")
@@ -88,12 +97,13 @@ public class SpringSecurityConfig {
       .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
+  }
 
-  //This is the default way to create a user
-  //This is not needed if you use the JdbcUserDetailsManager
-  //This is not needed if you use the AuthenticationProvider
-  // This is mainly used for setting up a default user
-  // Also the default provider is overtaken by the JdbcUserDetailsManager if you use it. So the jdbc one is used
+    //This is the default way to create a user
+    //This is not needed if you use the JdbcUserDetailsManager
+    //This is not needed if you use the AuthenticationProvider
+    // This is mainly used for setting up a default user
+    // Also the default provider is overtaken by the JdbcUserDetailsManager if you use it. So the jdbc one is used
 //  @Bean
 //  public UserDetailsService users() {
 //    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
@@ -124,7 +134,7 @@ public class SpringSecurityConfig {
 //    return new JwtAuthenticationFilter(jwtService, userDetailsService);
 //  }
 
-  //  @Bean
+    //  @Bean
 //  public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService, UserService userService) throws Exception {
 //    http
 //      .httpBasic(hp -> hp.disable())
@@ -140,11 +150,9 @@ public class SpringSecurityConfig {
 //    ;
 //    return http.build();
 //  }
+//  }
 
-
-  }
-
-  //Benificial because of: Centralized Configuration, Custom Queries, Flexibility
+    //Benificial because of: Centralized Configuration, Custom Queries, Flexibility
 //  @Bean
 //  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 //    AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -165,4 +173,4 @@ public class SpringSecurityConfig {
 //    return authenticationManagerBuilder.build();
 //  }
 
-}
+  }
