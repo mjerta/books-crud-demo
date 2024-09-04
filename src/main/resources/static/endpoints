@@ -1,0 +1,31 @@
+GET
+/menus
+/menus/{id}
+
+POST
+/menus
+
+PUT
+/menus/{id}
+
+PATCH
+/menu/{id}
+
+DELETE
+menu/{id}
+
+GET
+/ingredients
+/ingredients/{id}
+
+...etc
+
+Combinatie van de twee
+/menus/{id}/ingredients/
+Enz
+
+zelfde kan ik doen met orders en locaties voor mijn "idee"
+
+Bijzondere endpoint zou zijn
+POST /menus/[id}/ingredients want dan kan je meerdere ingredienten tergelijk toevoegen
+Dit is in ieder geval de basis en volgens REST standaarden dacht ik

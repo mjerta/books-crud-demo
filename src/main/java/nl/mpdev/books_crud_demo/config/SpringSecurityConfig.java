@@ -92,12 +92,8 @@ public class SpringSecurityConfig {
         .requestMatchers(HttpMethod.POST, "/register").hasAnyRole("ADMIN", "USER")
         .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "USER")
         .anyRequest().denyAll())
-      .httpBasic(Customizer.withDefaults())
+//      .httpBasic(Customizer.withDefaults())
 //      .formLogin(Customizer.withDefaults())
-      .logout(logout -> logout
-        .logoutSuccessUrl("/")
-        .permitAll()
-      )
 
       .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // This is needed to make the application stateless , so no session is created , this is needed for JWT , because JWT is stateless

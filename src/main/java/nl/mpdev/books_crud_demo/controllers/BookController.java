@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController()
 @RequestMapping("/api")
+@CrossOrigin
 public class BookController {
 
   private final BookService bookService;
@@ -30,7 +31,6 @@ public class BookController {
 
   @GetMapping("/csrf-token")
   public CsrfToken getCsrfToken(HttpServletRequest request) {
-
     return request.getAttribute("_csrf") != null ? (CsrfToken) request.getAttribute("_csrf") : null;
   }
 
@@ -77,12 +77,11 @@ public class BookController {
     return ResponseEntity.noContent().build();
   }
 
-  @DeleteMapping(value =  "/books/deletebooks/")
+  @DeleteMapping(value = "/books/deletebooks/")
   public ResponseEntity<Void> deleteBooks() {
     bookService.deleteAllBooks();
     return ResponseEntity.noContent().build();
   }
-
 
 //  2 examples of validation directly in the controller - which im not using. Im using globalexceptions handler
 //  @ResponseStatus(HttpStatus.I_AM_A_TEAPOT)

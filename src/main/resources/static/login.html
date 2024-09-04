@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Testing login endpoint</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <form action="" id="login-form">
+    <input id="username" type="text" name="username" placeholder="Username"/>
+    <input id="password" type="password" name="password" placeholder="Password"/>
+    <button id="login-button" type="submit"> Login</button>
+    <h3>Endpoint testing for all my books</h3>
+    <p class="all-books-data"></p>
+  </form>
+  
+  <button id="logout-button" onclick="logout()">Logout</button>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', login);
+    
+    async function login(e) {
+      e.preventDefault();
+      
+      let formData = new FormData(e.target);
+      const response = await fetch('http://localhost:8080/login', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.get('username'),
+          password: formData.get('password'),
+        }),
+      });
+      if (response.ok) {
+        const token = await response.text();
+        localStorage.setItem('token', token);
+        await getAllBooks();
+      } else {
+        console.error('Login failed');
+      }
+    }
+    
+    async function getAllBooks() {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/books/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const books = await response.json();
+        document.querySelector('.all-books-data').textContent = JSON.stringify(books, null, 2);
+        console.log(books[0].mainTitle);
+      } else {
+        console.error('Failed to fetch books');
+      }
+    }
+    // Check for token on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded');
+      const token = localStorage.getItem('token');
+      if (token) {
+        console.log('Token found');
+        getAllBooks();
+      }
+    });
+    
+    function logout() {
+      localStorage.removeItem('token');
+      document.querySelector('.all-books-data').textContent = '';
+    }
+  </script>
+</body>
+</html>
